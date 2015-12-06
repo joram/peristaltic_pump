@@ -5,6 +5,12 @@ module pump_arm_bottom(thickness, innner_d, outer_d, arm_radius, arm_mount_radiu
     pump_arm(thickness, innner_d, outer_d, arm_radius, arm_mount_radius);
     union(){
       translate(v=[0,0,3.6+thickness]) cube(size = [arm_mount_radius*4, arm_radius*4, thickness*2], center=true);
+
+      // alignment holes
+      translate(v=[0, arm_radius/2.5,2]) cylinder(r = 4.1, h = 50, center=true, $fn = fn);
+      translate(v=[0,-arm_radius/2.5,2]) cylinder(r = 4.1, h = 50, center=true, $fn = fn);
+
+      // bearings
       translate(v=[0, arm_radius,2]) cylinder(r = 11.5, h = 7.1, center=true, $fn = fn);
       translate(v=[0,-arm_radius,2]) cylinder(r = 11.5, h = 7.1, center=true, $fn = fn);
     }
@@ -12,9 +18,15 @@ module pump_arm_bottom(thickness, innner_d, outer_d, arm_radius, arm_mount_radiu
 }
 
 module pump_arm_top(thickness, innner_d, outer_d, arm_radius, arm_mount_radius){
-  difference(){
-    pump_arm(thickness, innner_d, outer_d, arm_radius, arm_mount_radius);
-    translate(v=[0,0,3.6-thickness*2]) cube(size = [arm_mount_radius*4, arm_radius*4, thickness*4], center=true);
+  union(){
+    translate(v=[0, arm_radius/2.5,2]) cylinder(r = 4.0, h = 13, center=true, $fn = fn);
+    translate(v=[0,-arm_radius/2.5,2]) cylinder(r = 4.0, h = 13, center=true, $fn = fn);
+    difference(){
+      pump_arm(thickness, innner_d, outer_d, arm_radius, arm_mount_radius);
+      union(){
+        translate(v=[0,0,3.6-thickness*2]) cube(size = [arm_mount_radius*4, arm_radius*4, thickness*4], center=true);
+      }
+    }
   }
 }
 
@@ -51,18 +63,16 @@ module pump_arm(thickness, innner_d, outer_d, arm_radius, arm_mount_radius){
       translate(v=[0,-arm_radius,0]) cylinder(r = 11.5, h = 7.1, center=true, $fn = fn);
 
       // 5mm stepper axle hole
-      translate(v=[0,0,0]) cylinder(r = 5/2, h = thickness*4+11, center=true, $fn = fn);
-      translate(v=[6,0, 5])  cube(size = [3, 7.1, 10], center=true);  // m4 nut slot
-      rotate([0,90,0]) translate(v=[3, 0, 10])  cylinder(r = 2, h = 20, center=true, $fn = fn);
+      translate(v=[0,0,0]) cylinder(r = 3, h = thickness*4+11, center=true, $fn = fn);
+      translate(v=[6,0,0])  cube(size = [3.5, 7.5, 30], center=true);  // m4 nut slot
+      rotate([0,90,0]) translate(v=[3, 0, 10])  cylinder(r = 2.5, h = 20, center=true, $fn = fn);
     }
   }
 
 
 }
 
-tubing_r = 30; 
-pump_arm(5, 7, 9 , tubing_r);
-
-//translate(v=[0,tubing_r-9,0]) m8_bearing();
-//translate(v=[0,-tubing_r+9,0]) m8_bearing();
-//color([0.1,1,0.1]) translate(v=[0,0,0]) cube(size = [100,100,0.01], center=true);
+tubing_r = 34; 
+//pump_arm(5, 7, 9, tubing_r, 9);
+pump_arm_bottom(5, 7, 9, tubing_r, 8);
+//translate(v=[0, 0, 20]) pump_arm_top(5, 7, 9 , tubing_r, 8);
