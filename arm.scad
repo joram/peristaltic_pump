@@ -1,78 +1,121 @@
 fn = 100;
+t = 0;
 
-module pump_arm_bottom(thickness, innner_d, outer_d, arm_radius, arm_mount_radius){
+// https://www.pololu.com/picture/0J2543.600.jpg?1276230060
+lock_d = 19.05 + t*2;
+lock_r = lock_d/2;
+lock_h = 5.08 + t;
+lock_mount_hole_offset = 6.35;
+lock_mount_hole_d = 2.845 + t*2;
+lock_mount_hole_r = lock_mount_hole_d/2;
+lock_mount_hole_l = 30;
+
+// http://www.bearingworks.com/bearing_sizes/index.php
+m8_d = 13 + t*2;
+m8_r = m8_d/2;
+m8_h = 5;
+m8_axle_d = 4 + t*2;
+m8_axle_r = m8_axle_d/2;
+m8_axle_shield_r = m8_axle_r + 1;
+
+module pump_arm_top(width, thickness){
+  buffer = 0.1;
+  radius = width/2;
+  bearing_axle_l = m8_h+0.5+thickness*2;  
   difference(){
-    pump_arm(thickness, innner_d, outer_d, arm_radius, arm_mount_radius);
+    pump_arm(width, thickness);
     union(){
-      translate(v=[0,0,3.6+thickness]) cube(size = [arm_mount_radius*4, arm_radius*4, thickness*2], center=true);
-
-      // alignment holes
-      translate(v=[0, arm_radius/2.5,2]) cylinder(r = 4.1, h = 50, center=true, $fn = fn);
-      translate(v=[0,-arm_radius/2.5,2]) cylinder(r = 4.1, h = 50, center=true, $fn = fn);
-
-      // bearings
-      translate(v=[0, arm_radius,2]) cylinder(r = 11.5, h = 7.1, center=true, $fn = fn);
-      translate(v=[0,-arm_radius,2]) cylinder(r = 11.5, h = 7.1, center=true, $fn = fn);
-    }
-  }
-}
-
-module pump_arm_top(thickness, innner_d, outer_d, arm_radius, arm_mount_radius){
-  union(){
-    translate(v=[0, arm_radius/2.5,2]) cylinder(r = 4.0, h = 13, center=true, $fn = fn);
-    translate(v=[0,-arm_radius/2.5,2]) cylinder(r = 4.0, h = 13, center=true, $fn = fn);
-    difference(){
-      pump_arm(thickness, innner_d, outer_d, arm_radius, arm_mount_radius);
-      union(){
-        translate(v=[0,0,3.6-thickness*2]) cube(size = [arm_mount_radius*4, arm_radius*4, thickness*4], center=true);
-      }
-    }
-  }
-}
-
-
-module pump_arm(thickness, innner_d, outer_d, arm_radius, arm_mount_radius){
-  radius = arm_mount_radius;
+      translate(v=[0,0, -25,]) cube(size=[30,100,50], center=true, $fn = fn);
   
-  difference(){
-    union(){
-      
-      // upper arm
-      translate(v=[0, arm_radius,3.6+thickness/2]) cylinder(r = radius, h = thickness, center=true, $fn = fn);
-      translate(v=[0,-arm_radius,3.6+thickness/2]) cylinder(r = radius, h = thickness, center=true, $fn = fn);
-      translate(v=[0,0,3.6+thickness/2]) cube(size = [radius*2, arm_radius*2, thickness], center=true);
+      // connection bolts
+      translate(v=[0,lock_r+3,0]) cylinder(r = 2.0+buffer, h = bearing_axle_l+buffer, center=true, $fn = fn);
+      translate(v=[0,-lock_r-3,0]) cylinder(r =2.0+buffer, h = bearing_axle_l+buffer, center=true, $fn = fn);
 
-      // lower arm
-      translate(v=[0,arm_radius,-(3.6+thickness/2)]) cylinder(r = radius, h = thickness, center=true, $fn = fn);
-      translate(v=[0,-arm_radius,-(3.6+thickness/2)]) cylinder(r = radius, h = thickness, center=true, $fn = fn);
-      translate(v=[0,0,-(3.6+thickness/2)]) cube(size = [radius*2, arm_radius*2, thickness], center=true);
-     
-     // body
-     translate(v=[0,0,0]) cube(size = [radius*2, arm_radius*2, 7.2+thickness*2], center=true);
-     translate(v=[5,0,0]) cube(size = [10, 20, 7.2+thickness*2], center=true);
-
+      // bearing axles
+      translate(v=[0, radius,0]) cylinder(r = m8_axle_r+buffer, h = bearing_axle_l+buffer, center=true, $fn = fn);
+      translate(v=[0,-radius,0]) cylinder(r = m8_axle_r+buffer, h = bearing_axle_l+buffer, center=true, $fn = fn);
     }
-    union(){
+  }
+}
 
-      // bolt holes
-      translate(v=[0, arm_radius,0]) cylinder(r = 4.1, h = 20, center=true, $fn = fn);
-      translate(v=[0,-arm_radius,0]) cylinder(r = 4.1, h = 20, center=true, $fn = fn);
+module pump_arm_bottom(width, thickness){
+  radius = width/2;
+  bearing_axle_l = m8_h+0.5+thickness*2;  
+  union(){
+    difference(){
+      pump_arm(width, thickness);
+      translate(v=[0,0, 25,]) cube(size=[30,100,50], center=true, $fn = fn);
+    }
+     // connection bolts
+     translate(v=[0,lock_r+3,0]) cylinder(r = 2.0, h = bearing_axle_l, center=true, $fn = fn);
+     translate(v=[0,-lock_r-3,0]) cylinder(r =2.0, h = bearing_axle_l, center=true, $fn = fn);
 
-      // bearing holes
-      translate(v=[0, arm_radius,0]) cylinder(r = 11.5, h = 7.1, center=true, $fn = fn);
-      translate(v=[0,-arm_radius,0]) cylinder(r = 11.5, h = 7.1, center=true, $fn = fn);
+     // bearing axles
+     translate(v=[0, radius,0]) cylinder(r = m8_axle_r, h = bearing_axle_l, center=true, $fn = fn);
+     translate(v=[0,-radius,0]) cylinder(r = m8_axle_r, h = bearing_axle_l, center=true, $fn = fn);
+
+  }
+}
+
+module pump_arm(width, thickness){  
+  difference(){
+    pump_arm_solid(width, thickness);
+    pump_arm_negative(width, thickness);
+  }
+}
+
+module pump_arm_solid(width, thickness){
+  radius = width/2;
+  bearing_axle_l = m8_h+0.5+thickness*2;  
+  
+  union(){
+     //arm
+     translate(v=[0,0,-m8_h/2-thickness/2-0.25]) cube(size=[m8_axle_shield_r*2,width, thickness], center=true, $fn = fn);
+     translate(v=[0,0,m8_h/2+thickness/2+0.25]) cube(size=[m8_axle_shield_r*2,width, thickness], center=true, $fn = fn);
+
+     // bearing axle shields
+     translate(v=[0,-radius,-m8_h/2-thickness/2-0.25/2])  cylinder(r=m8_axle_shield_r, h = thickness+0.25, center=true, $fn = fn);
+     translate(v=[0,radius,-m8_h/2-thickness/2-0.25/2])  cylinder(r=m8_axle_shield_r, h = thickness+0.25, center=true, $fn = fn);
+     translate(v=[0,-radius,m8_h/2+thickness/2+0.25/2])  cylinder(r=m8_axle_shield_r, h = thickness+0.25, center=true, $fn = fn);
+     translate(v=[0,radius,m8_h/2+thickness/2+0.25/2])  cylinder(r=m8_axle_shield_r, h = thickness+0.25, center=true, $fn = fn);
+
+     // body
+     cylinder(r=lock_r+2, h = bearing_axle_l, center=true, $fn = fn);
+     cube(size=[m8_axle_shield_r*2, 32, bearing_axle_l], center=true, $fn = fn);
+
+     // connection bolts
+     translate(v=[0,lock_r+3,0]) cylinder(r = 2.0, h = bearing_axle_l, center=true, $fn = fn);
+     translate(v=[0,-lock_r-3,0]) cylinder(r =2.0, h = bearing_axle_l, center=true, $fn = fn);
+
+     // bearing axles
+     translate(v=[0, radius,0]) cylinder(r = m8_axle_r, h = bearing_axle_l, center=true, $fn = fn);
+     translate(v=[0,-radius,0]) cylinder(r = m8_axle_r, h = bearing_axle_l, center=true, $fn = fn);
+
+     // bearings
+     //translate(v=[0,-radius,0])  cylinder(r=m8_r, h =m8_h, center=true, $fn = fn);
+     //translate(v=[0,radius, 0])  cylinder(r=m8_r, h = m8_h, center=true, $fn = fn);    
+  }
+}
+
+module pump_arm_negative(width, thickness){
+	// lock
+	cylinder(r =lock_r, h = lock_h, center=true, $fn = fn);
+       rotate([0,0,45]) union(){
+	  translate(v=[0, lock_mount_hole_offset,0]) cylinder(r = lock_mount_hole_r, h = lock_mount_hole_l, center=true, $fn = fn);
+	  translate(v=[0,-lock_mount_hole_offset,0]) cylinder(r = lock_mount_hole_r, h =lock_mount_hole_l, center=true, $fn = fn);
+	  translate(v=[ lock_mount_hole_offset,0]) cylinder(r = lock_mount_hole_r, h = lock_mount_hole_l, center=true, $fn = fn);
+         translate(v=[-lock_mount_hole_offset,0]) cylinder(r = lock_mount_hole_r, h = lock_mount_hole_l, center=true, $fn = fn);
+      }
+      // lock hole
+      rotate([0,90,0]) translate(v=[0, 0, 10])  cylinder(r = 2.5, h = 20, center=true, $fn = fn);
 
       // 5mm stepper axle hole
-      translate(v=[0,0,0]) cylinder(r = 3, h = thickness*4+11, center=true, $fn = fn);
-      translate(v=[6,0,0])  cube(size = [3.5, 7.5, 30], center=true);  // m4 nut slot
-      rotate([0,90,0]) translate(v=[3, 0, 10])  cylinder(r = 2.5, h = 20, center=true, $fn = fn);
-    }
-  }
-
-
+     translate(v=[0,0,0]) cylinder(r = 2.6, h = thickness*4+11, center=true, $fn = fn);
 }
 
-tubing_r = 34; 
-//pump_arm(5, 7, 9, tubing_r, 9);
-pump_arm_bottom(5, 7, 9, tubing_r, 8);
-//translate(v=[0, 0, 20]) pump_arm_top(5, 7, 9 , tubing_r, 8);
+
+//width = 68;
+width = 60; 
+thickness = 3;
+translate(v=[0,0,20]) pump_arm_top(width, thickness);
+//pump_arm_bottom(width, thickness);
